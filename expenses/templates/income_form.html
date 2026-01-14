@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="text-center mb-4">💵 Add Income</h3>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success text-center py-2">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<form method="POST" class="mx-auto" style="max-width:600px;">
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    <label for="source">Source</label>
+    <select id="source" name="source" class="form-select">
+      <option value="Salary">Salary</option>
+      <option value="Business">Business</option>
+      <option value="Investment">Investment</option>
+      <option value="Freelancing">Freelancing</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+
+  <div class="mb-3" id="customSourceField" style="display:none;">
+    <label for="customSource">Custom Source</label>
+    <input type="text" name="custom_source" id="customSource" class="form-control" placeholder="Enter custom source">
+  </div>
+
+  <div class="mb-3">
+    <label for="amount">Amount</label>
+    {{ form.amount }}
+  </div>
+
+  <div class="mb-3">
+    <label for="date">Date</label>
+    {{ form.date }}
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary w-50 me-2">⬅ Back</a>
+    <button type="submit" class="btn btn-primary w-50">Save</button>
+  </div>
+</form>
+
+<script>
+  document.getElementById('source').addEventListener('change', function() {
+    const customField = document.getElementById('customSourceField');
+    customField.style.display = this.value === 'Other' ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

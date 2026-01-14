@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+  <div class="card shadow p-4" style="max-width:420px; width:100%; border-radius:16px;">
+    <h3 class="text-center mb-4 text-primary">Welcome Back!</h3>
+
+    <form method="POST" novalidate>
+  {% csrf_token %}
+  
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger py-2">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  <div class="mb-3">
+    <label for="username" class="form-label">Username</label>
+    {{ form.username }}
+    {% for error in form.username.errors %}
+      <p class="text-danger small mt-1">{{ error }}</p>
+    {% endfor %}
+  </div>
+
+  <div class="mb-3 position-relative">
+    <label for="password" class="form-label">Password</label>
+    {{ form.password }}
+    <button type="button" class="toggle-password btn btn-sm position-absolute"
+            data-target="id_password"
+            style="top:52%; right:10px; border:none; background:none; color:#6c757d; font-size:18px;">👁️</button>
+    {% for error in form.password.errors %}
+      <p class="text-danger small mt-1">{{ error }}</p>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="btn btn-primary w-100 mb-2">Login</button>
+
+  <div class="text-center mt-2">
+    <small>New user? 
+      <a href="{% url 'register' %}" class="text-decoration-none text-primary">Create an account</a>
+    </small>
+  </div>
+</form>
+
+  </div>
+</div>
+
+<!-- Password toggle script -->
+<script>
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+        btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+      }
+    });
+  });
+</script>
+{% endblock %}

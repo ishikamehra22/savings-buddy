@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="text-center mb-4">🎯 Set Savings Goal</h3>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success text-center">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<form method="POST" class="mx-auto" style="max-width:600px;">
+  {% csrf_token %}
+  
+  <div class="mb-3">
+    <label for="title">Goal Title</label>
+    {{ form.title }}
+  </div>
+
+  <div class="mb-3">
+    <label for="target_amount">Target Amount</label>
+    {{ form.target_amount }}
+  </div>
+
+  <div class="mb-3">
+    <label for="deadline">Deadline</label>
+    {{ form.deadline }}
+  </div>
+
+  <div class="mb-3">
+    <label for="starting_balance">Starting Balance</label>
+    {{ form.starting_balance }}
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary w-50 me-2">⬅ Back</a>
+    <button type="submit" class="btn btn-primary w-50">Save Goal</button>
+  </div>
+</form>
+{% endblock %}

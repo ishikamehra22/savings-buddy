@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-3">
+
+  <!-- Welcome centered -->
+  <div class="text-center mb-3">
+    <h2 class="fw-semibold text-primary">Welcome, {{ user.username|capfirst }}</h2>
+  </div>
+
+  <!-- ADD Buttons -->
+  <div class="d-flex justify-content-center flex-wrap gap-3 mb-3 add-buttons">
+    <a class="btn btn-primary btn-lg btn-pill" href="{% url 'income_add' %}">➕ Add Income</a>
+    <a class="btn btn-primary btn-lg btn-pill" href="{% url 'expense_add' %}">➕ Add Expense</a>
+    <a class="btn btn-primary btn-lg btn-pill" href="{% url 'goal_add' %}">➕ Add Savings Goal</a>
+  </div>
+
+  <!-- VIEW Buttons -->
+  <div class="d-flex justify-content-center flex-wrap gap-2 mb-4 view-buttons">
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'income_list' %}">💼 View Income</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'expense_list' %}">💰 View Expenses</a>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="row gx-3 gy-3 mb-4">
+    <div class="col-md-4">
+      <div class="summary-card p-3 text-center dark-text-fix">
+        <h6 class="mb-2 summary-heading">Total Income</h6>
+        <h3 class="fw-bold text-success">₹{{ total_income|default:"0" }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="summary-card p-3 text-center dark-text-fix">
+        <h6 class="mb-2 summary-heading">Total Expense</h6>
+        <h3 class="fw-bold text-danger">₹{{ total_expense|default:"0" }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="summary-card p-3 text-center dark-text-fix">
+        <h6 class="mb-2 summary-heading">Net Savings</h6>
+        <h3 class="fw-bold text-info">₹{{ net_saving|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Savings Goal Section -->
+  {% if goal %}
+  <div class="goal-card mb-4 p-4 text-center dark-text-fix shadow-sm rounded">
+    <h5 class="fw-semibold mb-2 goal-heading">🎯 Savings Goal</h5>
+    <p class="mb-3 goal-subtext">
+      Target ₹{{ goal.target_amount }} | Deadline: {{ goal.deadline|date:"M d, Y" }}
+    </p>
+
+    <div class="progress position-relative rounded-pill" style="height: 25px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+           role="progressbar"
+           style="width: {{ progress|default:0 }}%">
+      </div>
+      <span class="position-absolute w-100 text-center fw-bold"
+            style="top: 50%; transform: translateY(-50%); color: #fff;">
+        {{ progress|floatformat:1 }}%
+      </span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Charts -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm h-100">
+        <h6 class="text-center mb-3">📊 Category-wise Spending</h6>
+        <div class="chart-wrap">
+          <canvas id="expenseChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm h-100">
+        <h6 class="text-center mb-3">📈 Monthly Expense Trend</h6>
+        <div class="chart-wrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-center mb-3">💹 Income vs Expense</h6>
+        <div class="chart-wrap">
+          <canvas id="incomeExpenseChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  // Chart.js common options
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "bottom" }
+    }
+  };
+
+  // Pie Chart
+  new Chart(document.getElementById("expenseChart"), {
+    type: "pie",
+    data: {
+      labels: {{ cat_labels|safe }},
+      datasets: [{
+        data: {{ cat_values|safe }},
+        backgroundColor: ["#0d6efd", "#198754", "#dc3545", "#ffc107", "#6610f2", "#20c997"]
+      }]
+    },
+    options: commonOptions
+  });
+
+  // Line Chart
+  new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+      labels: {{ labels|safe }},
+      datasets: [{
+        label: "Monthly Expenses",
+        data: {{ monthly_expenses|safe }},
+        borderColor: "#0d6efd",
+        backgroundColor: "rgba(13,110,253,0.15)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      ...commonOptions,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Bar Chart
+  new Chart(document.getElementById("incomeExpenseChart"), {
+    type: "bar",
+    data: {
+      labels: ["Income", "Expense"],
+      datasets: [{
+        label: "Amount (₹)",
+        data: [{{ total_income|default:0 }}, {{ total_expense|default:0 }}],
+        backgroundColor: ["#20c997", "#dc3545"],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label(ctx) { return `₹ ${ctx.formattedValue}`; }
+          }
+        }
+      },
+      scales: { y: { beginAtZero: true } },
+      animation: { duration: 900, easing: "easeOutQuart" }
+    }
+  });
+</script>
+
+<style>
+  .chart-wrap { height: 320px; }
+  .btn-pill { border-radius: 40px; }
+  .summary-card, .goal-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+  }
+  .goal-card h5, .goal-card p { color: var(--text); }
+  .goal-card .progress { background: rgba(0, 0, 0, 0.1); }
+  body.dark-mode .goal-card .progress { background: rgba(255, 255, 255, 0.1); }
+
+  /* Fix text visibility in light & dark mode */
+  .summary-heading, .goal-heading { color: #1c1f23 !important; }
+  body.dark-mode .summary-heading,
+  body.dark-mode .goal-heading { color: #f8f9fa !important; }
+
+  .goal-subtext { color: #444 !important; }
+  body.dark-mode .goal-subtext { color: #dcdcdc !important; }
+</style>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="text-center text-primary mb-4">💵 Income Records</h3>
+<div class="text-end mb-3">
+  <a href="{% url 'income_add' %}" class="btn btn-success btn-sm">➕ Add Income</a>
+</div>
+
+<div class="text-end mb-3">
+  <form method="post" action="{% url 'income_delete_all' %}" onsubmit="return confirm('Are you sure you want to delete ALL incomes?');">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-sm">🧹 Delete All Incomes</button>
+  </form>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle shadow-sm">
+    <thead class="table-primary">
+      <tr>
+        <th>Date</th>
+        <th>Source</th>
+        <th>Amount</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in incomes %}
+      <tr>
+        <td>{{ i.date }}</td>
+        <td>{{ i.source }}</td>
+        <td>₹{{ i.amount }}</td>
+        <td>
+          <a href="{% url 'income_edit' i.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+          <a href="{% url 'income_delete' i.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-center">No income records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
