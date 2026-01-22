@@ -6,12 +6,15 @@ from pathlib import Path
 # --------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-your-secret-key'  # you can keep or replace with your own
+SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-secret-key-for-local-dev")
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [
+    "savings-buddy.onrender.com",
+    "localhost",
+    "127.0.0.1"
+]
 # --------------------
 # Installed Apps
 # --------------------
